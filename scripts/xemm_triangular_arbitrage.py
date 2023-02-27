@@ -16,7 +16,7 @@ class XEMMTriangularArbitrage(ScriptStrategyBase):
     taker_pair1 = "CKB-USDT"
     taker_pair2 = "BTC-USDT"
 
-    order_amount = Decimal(.0001)                 # amount for each order
+    order_amount = Decimal(.0001)       # amount for each order
     spread_bps = 10                     # bot places maker orders at this spread to taker price
     min_spread_bps = 0                  # bot refreshes order if spread is lower than min-spread
     slippage_buffer_spread_bps = 100    # buffer applied to limit taker hedging trades on taker exchange
@@ -33,13 +33,13 @@ class XEMMTriangularArbitrage(ScriptStrategyBase):
     def on_tick(self):
         taker1_order_book = self.connectors[self.taker_exchange].get_order_book(self.taker_pair1)
 
-        taker2_buy_exchanged_amount = self.connectors[self.taker_exchange].get_quote_volume_for_base_amount(self.taker_pair2, 0, self.profit_amount_buy).result_volume
-        taker1_sell_exchanged_amount = self.get_base_amount_for_quote_volume(taker1_order_book.bid_entries(), taker2_buy_exchanged_amount)
-        maker_bid_price = self.order_amount / taker1_sell_exchanged_amount
+        taker1_sell_exchanged_amount = self.get_base_amount_for_quote_volume(taker1_order_book.bid_entries(), self.order_amount)
+        taker2_buy_exchanged_amount = self.connectors[self.taker_exchange].get_quote_volume_for_base_amount(self.taker_pair2, 0, taker1_sell_exchanged_amount).result_volume
+        maker_bid_price = self.order_amount / taker2_buy_exchanged_amount / Decimal(1 + self.min_profitability)
 
-        taker2_sell_exchanged_amount = self.connectors[self.taker_exchange].get_quote_volume_for_base_amount(self.taker_pair2, 1, self.profit_amount_sell).result_volume
-        taker1_buy_exchanged_amount = self.get_base_amount_for_quote_volume(taker1_order_book.ask_entries(), taker2_sell_exchanged_amount)
-        maker_ask_price = self.order_amount / taker1_buy_exchanged_amount
+        taker1_buy_exchanged_amount = self.get_base_amount_for_quote_volume(taker1_order_book.ask_entries(), self.order_amount)
+        taker2_sell_exchanged_amount = self.connectors[self.taker_exchange].get_quote_volume_for_base_amount(self.taker_pair2, 1, taker1_buy_exchanged_amount).result_volume
+        maker_ask_price = self.order_amount / taker2_sell_exchanged_amount * Decimal(1 + self.min_profitability)
 
         if not self.buy_order_placed:
             maker_buy_price = maker_bid_price
