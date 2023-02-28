@@ -32,6 +32,7 @@ class XEMMTriangularArbitrage(ScriptStrategyBase):
     maker_pair_base_asset, maker_pair_quote_asset = maker_pair.split("-")
     taker_pair1_base_asset, taker_pair1_quote_asset = taker_pair1.split("-")
     taker_pair2_base_asset, taker_pair2_quote_asset = taker_pair2.split("-")
+    
     def on_tick(self):
         taker = MarketTradingPairTuple(self.connectors[self.taker_exchange], self.taker_pair1, self.taker_pair1_base_asset, self.taker_pair1_quote_asset)
         third = MarketTradingPairTuple(self.connectors[self.taker_exchange], self.taker_pair2, self.taker_pair2_base_asset, self.taker_pair2_quote_asset)
