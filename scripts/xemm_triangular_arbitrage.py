@@ -144,7 +144,7 @@ class XEMMTriangularArbitrage(ScriptStrategyBase):
         else:
             if event.trade_type == TradeType.SELL and self.is_active_maker_order(event):
                 taker1_buy_result = self.connectors[self.taker_exchange].get_price_for_volume(self.taker_pair1, True, self.order_amount)
-                taker1_buy_amount = self.order_amount
+                taker1_buy_amount = self.order.amount
                 taker2_sell_amount = self.connectors[self.taker_exchange].get_quote_volume_for_base_amount(self.taker_pair1, 0, taker1_buy_amount).result_volume
                 taker2_sell_result = self.connectors[self.taker_exchange].get_price_for_volume(self.taker_pair2, False, taker2_sell_amount)
                 taker2_order_book = self.connectors[self.taker_exchange].get_order_book(self.taker_pair2)
